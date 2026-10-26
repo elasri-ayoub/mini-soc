@@ -1,0 +1,87 @@
+version: '3'
+
+networks:
+  soc-net:
+    external: true
+
+services:
+  shuffle-frontend:
+    image: ghcr.io/shuffle/shuffle-frontend:latest
+    container_name: shuffle-frontend
+    hostname: shuffle-frontend
+    ports:
+      - "3001:80"
+      - "3443:443"
+    environment:
+      - BACKEND_HOSTNAME=shuffle-backend
+    networks:
+      - soc-net
+    restart: unless-stopped
+    depends_on:
+      - shuffle-backend
+
+  shuffle-backend:
+    image: ghcr.io/shuffle/shuffle-backend:latest
+    container_name: shuffle-backend
+    hostname: shuffle-backend
+    ports:
+      - "5001:5001"
+    environment:
+      - BACKEND_HOSTNAME=shuffle-backend
+      - SHUFFLE_APP_HOTLOAD_FOLDER=/shuffle-apps
+      - SHUFFLE_FILE_LOCATION=/shuffle-files
+      - SHUFFLE_MEMCACHED_LOCATION=shuffle-memcached:11211
+      - SHUFFLE_OPENSEARCH_URL=http://shuffle-database:9200
+      - ORG_ID=Shuffle
+      - BASE_URL=http://shuffle-backend:5001
+      - DOCKER_API_VERSION=1.40
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./shuffle-apps:/shuffle-apps
+      - ./shuffle-files:/shuffle-files
+    networks:
+      - soc-net
+    restart: unless-stopped
+
+  shuffle-orborus:
+    image: ghcr.io/shuffle/shuffle-orborus:latest
+    container_name: shuffle-orborus
+    hostname: shuffle-orborus
+    environment:
+      - SHUFFLE_APP_HOTLOAD_FOLDER=/shuffle-apps
+      - BASE_URL=http://shuffle-backend:5001
+      - DOCKER_API_VERSION=1.40
+      - CLEANUP=true
+      - ENVIRONMENT_NAME=Shuffle
+      - ORG_ID=Shuffle
+      - SHUFFLE_BASE_IMAGE_NAME=shuffle
+      - SHUFFLE_BASE_IMAGE_REGISTRY=ghcr.io
+      - SHUFFLE_BASE_IMAGE_TAG=latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - soc-net
+    restart: unless-stopped
+
+  shuffle-database:
+    image: opensearchproject/opensearch:2.12.0
+    container_name: shuffle-database
+    hostname: shuffle-database
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - bootstrap.memory_lock=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - DISABLE_SECURITY_PLUGIN=true
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./shuffle-db:/usr/share/opensearch/data
+    networks:
+      - soc-net
+    restart: unless-stopped

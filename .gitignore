@@ -1,0 +1,15 @@
+# Bases de donnees et caches locaux Shuffle
+shuffle/shuffle-db/
+shuffle/shuffle-files/
+
+# Donnees persistantes TheHive / Cortex / Elasticsearch / Cassandra
+thehive/cassandra_data/
+thehive/es_data/
+thehive/thehive_data/
+thehive/thehive_index/
+thehive/cortex_data/
+
+# Logs et fichiers temporaires
+*.log
+.DS_Store
+*.swp

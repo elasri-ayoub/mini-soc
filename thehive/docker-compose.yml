@@ -1,0 +1,67 @@
+services:
+  cassandra:
+    image: cassandra:3.11
+    container_name: cassandra
+    restart: unless-stopped
+    environment:
+      - MAX_HEAP_SIZE=1G
+      - HEAP_NEWSIZE=100M
+      - CASSANDRA_CLUSTER_NAME=thp
+    volumes:
+      - ./cassandra_data:/var/lib/cassandra
+    networks:
+      - thehive-net
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    container_name: elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    volumes:
+      - ./es_data:/usr/share/elasticsearch/data
+    networks:
+      - thehive-net
+
+  cortex:
+    image: thehiveproject/cortex:3.1.7-1
+    container_name: cortex
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+    ports:
+      - "9001:9001"
+    volumes:
+      - ./cortex.conf:/etc/cortex/application.conf
+      - ./cortex_data:/var/cortex
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/cortex-jobs:/tmp/cortex-jobs
+    networks:
+      - thehive-net
+      - soc-net
+
+  thehive:
+    image: thehiveproject/thehive4:latest
+    container_name: thehive
+    restart: unless-stopped
+    depends_on:
+      - cassandra
+      - cortex
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./thehive_data:/opt/thp/thehive/data
+      - ./thehive_index:/opt/thp/thehive/index
+      - ./application.conf:/etc/thehive/application.conf
+    command: ["--cql-hostnames", "cassandra", "--no-config-secret"]
+    networks:
+      - thehive-net
+      - soc-net
+
+networks:
+  thehive-net:
+    driver: bridge
+  soc-net:
+    external: true
