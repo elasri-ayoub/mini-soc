@@ -1,0 +1,19 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    hydra \
+    nmap \
+    curl \
+    iputils-ping \
+    net-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+# Dictionnaire de test pour Hydra
+RUN mkdir -p /wordlists && \
+    echo -e "admin\n123456\npassword\npassword123\nroot" > /wordlists/passwords.txt && \
+    echo -e "user\nadmin\nroot" > /wordlists/users.txt
+
+WORKDIR /root
+CMD ["tail", "-f", "/dev/null"]

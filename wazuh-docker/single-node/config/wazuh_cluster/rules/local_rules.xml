@@ -1,0 +1,7 @@
+<group name="suricata,custom,">
+  <rule id="100050" level="10">
+    <match>EXPLOIT-ATTEMPT SSH connection attempt detected</match>
+    <description>Suricata: Détection d'une tentative d'intrusion SSH suspecte sur le réseau.</description>
+    <group>ids,attacks,</group>
+  </rule>
+</group>

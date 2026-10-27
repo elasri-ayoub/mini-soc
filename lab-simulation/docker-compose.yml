@@ -1,0 +1,30 @@
+services:
+  victim-host:
+    build:
+      context: .
+      dockerfile: Dockerfile.victim
+    container_name: victim-host
+    hostname: victim-host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_NICE
+    networks:
+      - soc-net
+    restart: unless-stopped
+
+  attacker-host:
+    build:
+      context: .
+      dockerfile: Dockerfile.attacker
+    container_name: attacker-host
+    hostname: attacker-host
+    networks:
+      - soc-net
+    depends_on:
+      - victim-host
+    restart: unless-stopped
+
+networks:
+  soc-net:
+    external: true

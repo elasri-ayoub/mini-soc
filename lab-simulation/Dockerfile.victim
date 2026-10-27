@@ -1,0 +1,46 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV WAZUH_MANAGER='wazuh.manager'
+ENV WAZUH_AGENT_GROUP='default'
+ENV WAZUH_AGENT_NAME='victim-node'
+
+# Installation des paquets de base, SSH, rsyslog, Suricata et outils réseau
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    apt-transport-https \
+    openssh-server \
+    rsyslog \
+    suricata \
+    net-tools \
+    iproute2 \
+    iputils-ping \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# Création du dossier des règles Suricata et ajout d'une règle par défaut (évite l'erreur SC_ERR_NO_RULES)
+RUN mkdir -p /etc/suricata/rules && \
+    echo 'alert tcp any any -> any 22 (msg:"EXPLOIT-ATTEMPT SSH connection attempt detected"; sid:1000001; rev:1;)' > /etc/suricata/rules/suricata.rules && \
+    mkdir -p /var/log/suricata && chmod 755 /var/log/suricata
+
+# Configuration SSH vulnérable au brute-force
+RUN mkdir -p /var/run/sshd && \
+    echo 'root:password123' | chpasswd && \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#LogLevel INFO/LogLevel VERBOSE/' /etc/ssh/sshd_config
+
+# Installation de l'agent Wazuh (version alignée 4.9.0-1)
+RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && \
+    chmod 644 /usr/share/keyrings/wazuh.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt/sources.list.d/wazuh.list && \
+    apt-get update && apt-get install -y wazuh-agent=4.9.0-1 && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY entrypoint-victim.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 22
+
+ENTRYPOINT ["/entrypoint.sh"]
