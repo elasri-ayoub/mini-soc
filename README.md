@@ -107,34 +107,25 @@ Once all containers are up and running, you can access each component via your b
 
 Overview of running containers and network topology.
 
-![SOC Architecture](assets/00_deploiement_soc/00_01_docker_soc_containers_running)
+![SOC Architecture](assets/00_deploiement_soc/00_01_docker_soc_containers_running.PNG)
 
 ### 01. SSH Brute-Force Detection
 
 Wazuh detecting brute-force attacks and triggering automated alerts.
 
-> Add your screenshots in `assets/01_bruteforce_ssh/`
-
-![SSH Brute-Force](assets/01_bruteforce_ssh/01_04_thehive_case_observable)
+![SSH Brute-Force](assets/01_bruteforce_ssh/01_04_thehive_case_observable.PNG)
 
 ### 02. Suricata NIDS Integration
 
 Network intrusion detection alerts captured and centralized.
 
-> Add your screenshots in `assets/02_suricata_nids/`
-
-![Suricata NIDS](assets/02_suricata_nids/02_04_thehive_suricata_case)
+![Suricata NIDS](assets/02_suricata_nids/02_04_thehive_suricata_case.PNG)
 
 ### 03. File Integrity Monitoring (FIM)
 
 Real-time tracking of critical file modifications.
 
-> Add your screenshots in `assets/03_fim_integrite/`
-
-![File Integrity Monitoring](assets/03_fim_integrite/03_03_shuffle_fim_execution)
-
----
-
+![File Integrity Monitoring](assets/03_fim_integrite/03_03_shuffle_fim_execution.PNG)
 ## 🛑 Stopping the Lab
 
 To stop all containers cleanly without losing data, run:
