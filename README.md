@@ -150,6 +150,5 @@ To stop all containers cleanly without losing data, run:
 **Ayoub El Asri**
 
 - Engineering Student in Computer Engineering (Cybersecurity & Cloud Computing)
-- [LinkedIn Profile](https://www.linkedin.com/in/ayoub-elasri-cs)ing Student in Computer Engineering (Cybersecurity & Cloud Computing)
 - [LinkedIn Profile](https://www.linkedin.com/in/ayoub-elasri-cs)
                
